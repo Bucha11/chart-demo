@@ -2,11 +2,11 @@ import React from 'react';
 
 interface Props {
   raw: any[];
-  onChange: (rows: any[]) => void;
+  onChange: (rows: any[], opts: { groupField: string }) => void;
 }
 
 export default function FiltersPanel({ raw, onChange }: Props) {
-  const [groupField, setGroupField] = React.useState('category');
+  const [groupField, setGroupField] = React.useState<string>('category');
   const [minAmount, setMinAmount] = React.useState<string>('');
   const [maxAmount, setMaxAmount] = React.useState<string>('');
   const [fromDate, setFromDate] = React.useState('');
@@ -42,8 +42,8 @@ export default function FiltersPanel({ raw, onChange }: Props) {
       rows = rows.filter((r) => typeof r.amount === 'number' ? r.amount <= m : !isNaN(Number(r.amount)) && Number(r.amount) <= m);
     }
 
-    // grouping selection isn't mutating rows here — it's for charts selection; still pass filtered rows back
-    onChange(rows);
+    // notify parent of filtered rows and current groupField
+    onChange(rows, { groupField });
   }, [raw, fromDate, toDate, minAmount, maxAmount, groupField, onChange]);
 
   return (

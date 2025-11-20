@@ -14,10 +14,12 @@ export default function App() {
   }, []);
 
   const [filtered, setFiltered] = React.useState<any[]>(rawPreview);
+  const [groupField, setGroupField] = React.useState<string>('category');
 
   React.useEffect(() => {
-    // reset filtered when new preview arrives
+    // reset filtered and default group when new preview arrives
     setFiltered(rawPreview);
+    setGroupField('category');
   }, [rawPreview]);
 
   return (
@@ -38,12 +40,15 @@ export default function App() {
             <section className="filters">
               <FiltersPanel
                 raw={rawPreview}
-                onChange={(rows) => setFiltered(rows)}
+                onChange={(rows, opts) => {
+                  setFiltered(rows);
+                  setGroupField(opts.groupField || 'category');
+                }}
               />
             </section>
 
             <section className="charts">
-              <ChartsPanel analysis={analysis} data={filtered} />
+              <ChartsPanel analysis={analysis} data={filtered} groupField={groupField} />
             </section>
 
             <section className="table">
