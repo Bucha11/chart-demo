@@ -5,7 +5,22 @@ export default function DataTable({ data }: { data: any[] }) {
   const [sortKey, setSortKey] = React.useState<string | null>(null);
   const [asc, setAsc] = React.useState(true);
 
-  const filtered = data.filter((row) => JSON.stringify(row).toLowerCase().includes(query.toLowerCase()));
+  React.useEffect(() => {
+    // reset search when data source changes
+    setQuery('');
+    setSortKey(null);
+    setAsc(true);
+  }, [data]);
+
+  const q = query.trim().toLowerCase();
+  const filtered = (data || []).filter((row) => {
+    if (!q) return true;
+    try {
+      return JSON.stringify(row).toLowerCase().includes(q);
+    } catch (e) {
+      return false;
+    }
+  });
 
   const sorted = React.useMemo(() => {
     if (!sortKey) return filtered;
@@ -19,7 +34,11 @@ export default function DataTable({ data }: { data: any[] }) {
     });
   }, [filtered, sortKey, asc]);
 
-  const keys = data[0] ? Object.keys(data[0]) : [];
+  const keys = data && data[0] ? Object.keys(data[0]) : [];
+
+  if (!data || data.length === 0) {
+    return <div>No data to display</div>;
+  }
 
   return (
     <div>

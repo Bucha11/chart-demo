@@ -1,6 +1,6 @@
 import React from 'react';
 import { Analysis } from '../types/api';
-import { LineChart, Line, XAxis, YAxis, Tooltip, BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, Tooltip, BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, ScatterChart, Scatter } from 'recharts';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AA55FF'];
 
@@ -28,6 +28,7 @@ function downloadCSVFromSummary(summary: Analysis['summary'], filename = 'summar
 }
 
 export default function ChartsPanel({ analysis, data, groupField }: { analysis: Analysis; data: any[]; groupField: string }) {
+  const [rawMode, setRawMode] = React.useState(false);
   // compute metrics from provided data (filtered preview) so charts reflect filters
   const computeAnalysisFromData = (rows: any[]) => {
     const summary: Analysis['summary'] = {};
@@ -77,8 +78,34 @@ export default function ChartsPanel({ analysis, data, groupField }: { analysis: 
     ? Object.entries(computed.summary).map(([metric, v]) => ({ metric, avg: v.avg }))
     : [];
 
+  // raw data plotting helpers
+  const rawAmountSeries = (rows: any[]) =>
+    (rows || [])
+      .map((r, i) => ({
+        index: i,
+        date: r.timestamp ? String(r.timestamp).slice(0, 19) : '',
+        amount: typeof r.amount === 'number' ? r.amount : Number(r.amount),
+      }))
+      .filter((p) => !Number.isNaN(p.amount));
+
+  const rawBarSeries = (rows: any[]) =>
+    rawAmountSeries(rows).slice(0, 50).map((p) => ({ name: String(p.index), value: p.amount }));
+
+  const lineRaw = rawAmountSeries(data || []);
+
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
+        <div>
+          <label style={{ marginRight: 8 }}>
+            <input type="checkbox" checked={rawMode} onChange={(e) => setRawMode(e.target.checked)} /> Use raw data
+          </label>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={() => downloadJSON(computed, 'analysis.json')}>Download JSON</button>
+          <button onClick={() => downloadCSVFromSummary(computed.summary, 'summary.csv')}>Download CSV</button>
+        </div>
+      </div>
         <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
         <button onClick={() => downloadJSON(computed, 'analysis.json')}>Download JSON</button>
         <button onClick={() => downloadCSVFromSummary(computed.summary, 'summary.csv')}>Download CSV</button>
@@ -86,12 +113,22 @@ export default function ChartsPanel({ analysis, data, groupField }: { analysis: 
       <div style={{ height: 300 }}>
         <h3>Per Day</h3>
         <ResponsiveContainer>
-          <LineChart data={perDayData}>
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip />
-            <Line type="monotone" dataKey="value" stroke="#007bff" />
-          </LineChart>
+          {rawMode ? (
+            // scatter/line of raw amounts over time
+            <ScatterChart>
+              <XAxis dataKey="date" type="category" />
+              <YAxis />
+              <Tooltip />
+              <Scatter data={lineRaw} fill="#007bff" />
+            </ScatterChart>
+          ) : (
+            <LineChart data={perDayData}>
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip />
+              <Line type="monotone" dataKey="value" stroke="#007bff" />
+            </LineChart>
+          )}
         </ResponsiveContainer>
       </div>
 
@@ -110,14 +147,23 @@ export default function ChartsPanel({ analysis, data, groupField }: { analysis: 
       </div>
 
       <div style={{ height: 300, gridColumn: '1 / -1' }}>
-        <h3>Summary (avg)</h3>
+        <h3>{rawMode ? 'Raw amounts (first 50 rows)' : 'Summary (avg)'}</h3>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={barData}>
-            <XAxis dataKey="metric" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="avg" fill="#82ca9d" />
-          </BarChart>
+          {rawMode ? (
+            <BarChart data={rawBarSeries(data || [])}>
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="value" fill="#82ca9d" />
+            </BarChart>
+          ) : (
+            <BarChart data={barData}>
+              <XAxis dataKey="metric" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="avg" fill="#82ca9d" />
+            </BarChart>
+          )}
         </ResponsiveContainer>
       </div>
     </div>
