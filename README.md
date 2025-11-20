@@ -2,6 +2,8 @@
 
 Lightweight full-stack project for uploading CSV/JSON datasets, parsing and analyzing them, visualizing results, and storing upload history.
 
+live-version https://chart-demo-bn8b.vercel.app/
+
 ## Overview
 
 This repository contains a backend (Node + Express + TypeScript + Prisma) and a frontend (React + Vite + TypeScript). The backend parses CSV/JSON files (up to 10MB), computes summary statistics, grouping and per-day aggregations, and caches results by SHA-256 file hash (Redis or in-memory fallback). Upload metadata is stored in PostgreSQL via Prisma.
@@ -93,10 +95,10 @@ From `backend` run `npm test` to execute unit tests for parsing and analysis.
 - Files larger than 10MB are rejected.
 - Frontend filtering operates on `rawPreview` only (not full dataset on server).
 
-## Time tracking (example)
+## Time tracking
 
 Task	Time spent
 Backend setup (Express, TS, Prisma)	2h
 Data parsing & analysis	2h
 Frontend UI & charts	3h
-Tests + README + polish	2h
+Tests + README + polish	1h
