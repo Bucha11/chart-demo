@@ -13,6 +13,13 @@ export default function App() {
     fetchHistory();
   }, []);
 
+  const [filtered, setFiltered] = React.useState<any[]>(rawPreview);
+
+  React.useEffect(() => {
+    // reset filtered when new preview arrives
+    setFiltered(rawPreview);
+  }, [rawPreview]);
+
   return (
     <div className="app">
       <header>
@@ -29,15 +36,18 @@ export default function App() {
         {analysis && (
           <>
             <section className="filters">
-              <FiltersPanel raw={rawPreview} />
+              <FiltersPanel
+                raw={rawPreview}
+                onChange={(rows) => setFiltered(rows)}
+              />
             </section>
 
             <section className="charts">
-              <ChartsPanel analysis={analysis} />
+              <ChartsPanel analysis={analysis} data={filtered} />
             </section>
 
             <section className="table">
-              <DataTable data={rawPreview} />
+              <DataTable data={filtered} />
             </section>
           </>
         )}

@@ -1,14 +1,53 @@
 import React from 'react';
 
-export default function FiltersPanel({ raw }: { raw: any[] }) {
+interface Props {
+  raw: any[];
+  onChange: (rows: any[]) => void;
+}
+
+export default function FiltersPanel({ raw, onChange }: Props) {
   const [groupField, setGroupField] = React.useState('category');
   const [minAmount, setMinAmount] = React.useState<string>('');
   const [maxAmount, setMaxAmount] = React.useState<string>('');
   const [fromDate, setFromDate] = React.useState('');
   const [toDate, setToDate] = React.useState('');
 
+  React.useEffect(() => {
+    // apply filters on raw
+    let rows = raw ?? [];
+
+    if (fromDate) {
+      const fromTs = new Date(fromDate).getTime();
+      rows = rows.filter((r) => {
+        const t = r.timestamp ? new Date(String(r.timestamp)).getTime() : NaN;
+        return !isNaN(t) && t >= fromTs;
+      });
+    }
+
+    if (toDate) {
+      const toTs = new Date(toDate).getTime();
+      rows = rows.filter((r) => {
+        const t = r.timestamp ? new Date(String(r.timestamp)).getTime() : NaN;
+        return !isNaN(t) && t <= toTs;
+      });
+    }
+
+    if (minAmount !== '') {
+      const m = Number(minAmount);
+      rows = rows.filter((r) => typeof r.amount === 'number' ? r.amount >= m : !isNaN(Number(r.amount)) && Number(r.amount) >= m);
+    }
+
+    if (maxAmount !== '') {
+      const m = Number(maxAmount);
+      rows = rows.filter((r) => typeof r.amount === 'number' ? r.amount <= m : !isNaN(Number(r.amount)) && Number(r.amount) <= m);
+    }
+
+    // grouping selection isn't mutating rows here — it's for charts selection; still pass filtered rows back
+    onChange(rows);
+  }, [raw, fromDate, toDate, minAmount, maxAmount, groupField, onChange]);
+
   return (
-    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+    <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
       <label>
         Group by:
         <select value={groupField} onChange={(e) => setGroupField(e.target.value)}>

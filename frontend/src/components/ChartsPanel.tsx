@@ -4,7 +4,30 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, BarChart, Bar, PieChart, Pie, C
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AA55FF'];
 
-export default function ChartsPanel({ analysis }: { analysis: Analysis }) {
+function downloadJSON(obj: any, filename = 'analysis.json') {
+  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function downloadCSVFromSummary(summary: Analysis['summary'], filename = 'summary.csv') {
+  const header = ['metric', 'count', 'avg', 'min', 'max'];
+  const rows = Object.entries(summary).map(([metric, v]) => [metric, String(v.count), String(v.avg), String(v.min), String(v.max)]);
+  const csv = [header.join(','), ...rows.map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(','))].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export default function ChartsPanel({ analysis, data }: { analysis: Analysis; data: any[] }) {
   const perDayData = Object.entries(analysis.perDay).map(([date, value]) => ({ date, value }));
   const groupData = Object.entries(analysis.groupBy).map(([name, value]) => ({ name, value }));
   const summaryKey = Object.keys(analysis.summary)[0];
@@ -14,6 +37,10 @@ export default function ChartsPanel({ analysis }: { analysis: Analysis }) {
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+        <button onClick={() => downloadJSON(analysis, 'analysis.json')}>Download JSON</button>
+        <button onClick={() => downloadCSVFromSummary(analysis.summary, 'summary.csv')}>Download CSV</button>
+      </div>
       <div style={{ height: 300 }}>
         <h3>Per Day</h3>
         <ResponsiveContainer>
