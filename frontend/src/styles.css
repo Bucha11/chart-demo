@@ -1,0 +1,6 @@
+body { font-family: Arial, sans-serif; margin: 0; padding: 16px; }
+.app header { margin-bottom: 16px; }
+.upload { margin-bottom: 16px; }
+.charts, .table, .filters { margin-top: 16px; }
+.loading { color: #007bff; }
+.error { color: #c00; }
