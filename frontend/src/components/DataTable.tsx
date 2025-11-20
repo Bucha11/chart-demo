@@ -42,7 +42,7 @@ export default function DataTable({ data }: { data: any[] }) {
 
   return (
     <div>
-      <div style={{ marginBottom: 8 }}>
+      <div style={{ marginBottom: 8, marginTop: 100 }}>
         <input placeholder="Search..." value={query} onChange={(e) => setQuery(e.target.value)} />
       </div>
       <table border={1} cellPadding={6} style={{ width: '100%', borderCollapse: 'collapse' }}>

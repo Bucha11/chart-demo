@@ -103,11 +103,9 @@ export default function ChartsPanel({ analysis, data, groupField }: { analysis: 
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={() => downloadJSON(computed, 'analysis.json')}>Download JSON</button>
-          <button onClick={() => downloadCSVFromSummary(computed.summary, 'summary.csv')}>Download CSV</button>
         </div>
       </div>
         <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-        <button onClick={() => downloadJSON(computed, 'analysis.json')}>Download JSON</button>
         <button onClick={() => downloadCSVFromSummary(computed.summary, 'summary.csv')}>Download CSV</button>
       </div>
       <div style={{ height: 300 }}>
