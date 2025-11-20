@@ -1,5 +1,6 @@
+// Using SQLite for local development by default so migrations work without a PostgreSQL server.
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
