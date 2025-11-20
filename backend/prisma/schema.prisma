@@ -16,4 +16,6 @@ model Upload {
   rowsCount  Int
   createdAt  DateTime @default(now())
   fileHash   String   @unique
+  analysis   String?
+  rawPreview String?
 }
